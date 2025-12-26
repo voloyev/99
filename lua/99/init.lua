@@ -5,6 +5,7 @@ local Languages = require("99.language")
 local Window = require("99.window")
 local geo = require("99.geo")
 local Range = geo.Range
+local get_id = require("99.id")
 
 --- @alias _99.Cleanup fun(): nil
 
@@ -97,16 +98,22 @@ local _99 = {
 }
 
 function _99.implement_fn()
-    ops.implement_fn(_99_state)
+    local trace_id = get_id()
+    Logger:debug("99 Request", "method", "implement_fn", "id", trace_id)
+    ops.implement_fn(_99_state, trace_id)
 end
 
 function _99.fill_in_function()
+    local trace_id = get_id()
+    Logger:debug("99 Request", "method", "fill_in_function", "id", trace_id)
     ops.fill_in_function(_99_state)
 end
 
 function _99.visual()
+    local trace_id = get_id()
     local range = Range.from_visual_selection()
-    ops.query(_99_state, range)
+    Logger:debug("99 Request", "method", "visual", "id", trace_id)
+    ops.visual(_99_state, range)
 end
 
 --- View all the logs that are currently cached.  Cached log count is determined

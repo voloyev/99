@@ -50,6 +50,17 @@ end
 --- @class LoggerSink
 --- @field write_line fun(LoggerSink, string): nil
 
+--- @class VoidLogger : LoggerSink
+local VoidLogger = {}
+VoidLogger.__index = VoidLogger
+
+function VoidLogger.new()
+    return setmetatable({}, VoidLogger)
+end
+
+--- @param _ string
+function VoidLogger:write_line(_) end
+
 --- @class FileSink : LoggerSink
 --- @field fd number
 local FileSink = {}
@@ -92,7 +103,7 @@ function PrintSink:write_line(str)
     print(str)
 end
 
---- @class Logger
+--- @class _99.Logger
 --- @field level number
 --- @field sink LoggerSink
 --- @field print_on_error boolean
@@ -101,6 +112,7 @@ end
 --- @field max_errors_cached number
 --- @field error_cache string[]
 --- @field error_cache_level number
+--- @field extra_params string[]
 local Logger = {}
 Logger.__index = Logger
 
@@ -108,7 +120,7 @@ Logger.__index = Logger
 function Logger:new(level)
     level = level or levels.FATAL
     return setmetatable({
-        sink = PrintSink:new(),
+        sink = VoidLogger:new(),
         level = level,
         print_on_error = false,
         log_cache = {},
@@ -119,27 +131,58 @@ function Logger:new(level)
     }, self)
 end
 
+function Logger:clone()
+    return setmetatable({
+        sink = self.sink,
+        level = self.level,
+        print_on_error = self.print_on_error,
+        log_cache = {},
+        error_cache = {},
+        error_cache_level = self.error_cache_level,
+        max_errors_cached = self.max_errors_cached,
+        max_logs_cached = self.max_logs_cached,
+    }, Logger)
+end
+
 --- @param path string
---- @return Logger
+--- @return _99.Logger
 function Logger:file_sink(path)
     self.sink = FileSink:new(path)
     return self
 end
 
---- @return Logger
+--- @return _99.Logger
 function Logger:print_sink()
     self.sink = PrintSink:new()
     return self
 end
 
+--- @param area string
+--- @return _99.Logger
+function Logger:set_area(area)
+    local new_logger = self:clone()
+    table.insert(new_logger.extra_params, "Area")
+    table.insert(new_logger.extra_params, area)
+    return new_logger
+end
+
+--- @param xid number
+--- @return _99.Logger
+function Logger:set_id(xid)
+    local new_logger = self:clone()
+    table.insert(new_logger.extra_params, "id")
+    table.insert(new_logger.extra_params, xid)
+    return new_logger
+end
+
 --- @param level number
---- @return Logger
+--- @return _99.Logger
 function Logger:set_level(level)
     self.level = level
     return self
 end
 
---- @return Logger
+--- @return _99.Logger
 function Logger:on_error_print_message()
     self.print_on_error = true
     return self

@@ -10,7 +10,7 @@ local Context = {}
 Context.__index = Context
 
 --- @param _99 _99.State
-function Context.new(_99)
+function Context.new(_99, xid)
     local mds = {}
     for _, md in ipairs(_99.md_files) do
         table.insert(mds, md)

@@ -38,14 +38,16 @@ local function update_file_with_changes(res, location)
 end
 
 --- @param _99 _99.State
-local function fill_in_function(_99)
+--- @param xid number
+local function fill_in_function(_99, xid)
+    local logger = Logger:set_area("fill_in_function"):set_id(xid)
     local ts = editor.treesitter
     local buffer = vim.api.nvim_get_current_buf()
     local cursor = Point:from_cursor()
     local func = ts.containing_function(buffer, cursor)
 
     if not func then
-        Logger:fatal("fill_in_function: unable to find any containing function")
+        logger:fatal("fill_in_function: unable to find any containing function")
         return
     end
 
@@ -57,6 +59,7 @@ local function fill_in_function(_99)
 
     local context = Context.new(_99):finalize(_99, location)
     local request = Request.new({
+        xid = xid,
         provider = _99.provider_override,
         model = _99.model,
         tmp_file = context.tmp_file,
@@ -98,11 +101,11 @@ local function fill_in_function(_99)
                             )
                     )
                 end
-                Logger:error(
+                logger:error(
                     "unable to fill in function, enable and check logger for more details"
                 )
             elseif status == "cancelled" then
-                Logger:debug("fill_in_function was cancelled")
+                logger:debug("fill_in_function was cancelled")
                 -- TODO: small status window here
             elseif status == "success" then
                 update_file_with_changes(response, location)
@@ -110,7 +113,7 @@ local function fill_in_function(_99)
             clean_up()
         end,
         on_stderr = function(line)
-            Logger:debug("fill_in_function#on_stderr", "line", line)
+            logger:debug("fill_in_function#on_stderr", "line", line)
         end,
     })
 end

@@ -8,7 +8,7 @@ local Range = require("99.geo").Range
 
 --- @param _99 _99.State
 --- @param range _99.Range
-local function query(_99, range)
+local function visual(_99, range)
     local location = Location.from_range(range)
     local context = Context.new(_99):finalize(_99, location)
     local request = Request.new({
@@ -69,4 +69,4 @@ local function query(_99, range)
     })
 end
 
-return query
+return visual

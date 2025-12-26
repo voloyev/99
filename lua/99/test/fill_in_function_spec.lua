@@ -2,8 +2,6 @@
 local _99 = require("99")
 local test_utils = require("99.test.test_utils")
 local eq = assert.are.same
-local test_content = require("99.test.test_content")
-local Logger = require("99.logger.logger")
 local Levels = require("99.logger.level")
 
 --- @param content string[]

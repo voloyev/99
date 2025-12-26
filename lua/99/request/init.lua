@@ -1,19 +1,11 @@
 local Logger = require("99.logger.logger")
 
-local _id = 1
---- no, i am not going to use a uuid, in case of collision, call the police
---- @return string
-local function get_id()
-    local id = _id
-    _id = _id + 1
-    return tostring(id)
-end
-
 --- @param opts _99.Request.Opts
 local function validate_opts(opts)
     assert(opts.model, "you must provide a model for hange requests to work")
     assert(opts.tmp_file, "you must provide context")
     assert(opts.provider, "you must provide a model provider")
+    assert(opts.xid, "you must provide a request id")
 end
 
 --- @alias _99.Request.State "ready" | "calling-model" | "parsing-result" | "updating-file" | "cancelled"
@@ -60,7 +52,7 @@ function OpenCodeProvider:make_request(query, request, observer)
         observer.on_complete(status, text)
     end)
 
-    local id = get_id()
+    local id = request.config.xid
     Logger:debug("make_request", "tmp_file", request.config.tmp_file, "id", id)
     vim.system(
         { "opencode", "run", "-m", request.config.model, query },
@@ -155,11 +147,13 @@ end
 --- @field model string
 --- @field tmp_file string
 --- @field provider _99.Provider?
+--- @field xid number
 
 --- @class _99.Request.Config
 --- @field model string
 --- @field tmp_file string
 --- @field provider _99.Provider
+--- @field xid number
 
 --- @class _99.Request
 --- @field config _99.Request.Config
@@ -184,6 +178,7 @@ function Request.new(opts)
 end
 
 function Request:cancel()
+    Logger:debug("Request#cancel", "id", self.config.xid)
     self.state = "cancelled"
 end
 
