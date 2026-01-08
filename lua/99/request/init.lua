@@ -159,6 +159,7 @@ end
 --- @field logger _99.Logger
 --- @field _content string[]
 --- @field _proc vim.SystemObj?
+
 local Request = {}
 Request.__index = Request
 
@@ -186,7 +187,8 @@ function Request:cancel()
     self.state = "cancelled"
     if self._proc and self._proc.pid then
         pcall(function()
-            self._proc:kill(15)
+            local sigterm = (vim.uv and vim.uv.constants and vim.uv.constants.SIGTERM) or 15
+            self._proc:kill(sigterm)
         end)
     end
 end
