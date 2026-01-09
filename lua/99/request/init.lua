@@ -48,7 +48,7 @@ function OpenCodeProvider:make_request(query, request, observer)
 
     local command = { "opencode", "run", "-m", request.context.model, query }
     logger:debug("make_request", "command", command)
-    vim.system(
+    local proc = vim.system(
         command,
         {
             text = true,
@@ -111,6 +111,8 @@ function OpenCodeProvider:make_request(query, request, observer)
             end)
         end)
     )
+
+    request:_set_process(proc)
 end
 
 --- @param request _99.Request
@@ -156,6 +158,8 @@ end
 --- @field provider _99.Provider
 --- @field logger _99.Logger
 --- @field _content string[]
+--- @field _proc vim.SystemObj?
+
 local Request = {}
 Request.__index = Request
 
@@ -169,12 +173,28 @@ function Request.new(context)
         state = "ready",
         logger = context.logger:set_area("Request"),
         _content = {},
+        _proc = nil,
     }, Request)
+end
+
+--- @param proc vim.SystemObj?
+function Request:_set_process(proc)
+    self._proc = proc
 end
 
 function Request:cancel()
     self.logger:debug("cancel")
     self.state = "cancelled"
+    if self._proc and self._proc.pid then
+        pcall(function()
+            local sigterm = (
+                vim.uv
+                and vim.uv.constants
+                and vim.uv.constants.SIGTERM
+            ) or 15
+            self._proc:kill(sigterm)
+        end)
+    end
 end
 
 function Request:is_cancelled()

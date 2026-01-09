@@ -252,6 +252,12 @@ function _99.setup(opts)
     _99_state = _99_State.new()
     _99_state.provider_override = opts.provider
 
+    vim.api.nvim_create_autocmd("VimLeavePre", {
+        callback = function()
+            _99.stop_all_requests()
+        end,
+    })
+
     Logger:configure(opts.logger)
 
     if opts.model then
