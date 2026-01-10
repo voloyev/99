@@ -68,9 +68,9 @@ jobs:
       run: |
         nvim --headless -u NONE -i NONE \
           -c "set rtp+=../nvim-treesitter" \
-          -c "lua local ok, err = pcall(function() require('nvim-treesitter').install({ 'lua', 'typescript' }):wait(300000) end); if not ok then vim.api.nvim_err_writeln(err); vim.cmd('cq') end" \
-          -c "lua if #vim.api.nvim_get_runtime_file('parser/lua.so', true) == 0 then vim.api.nvim_err_writeln('lua parser missing after install'); vim.cmd('cq') end" \
-          -c "lua if #vim.api.nvim_get_runtime_file('parser/typescript.so', true) == 0 then vim.api.nvim_err_writeln('typescript parser missing after install'); vim.cmd('cq') end" \
+          -c "lua local install_dir = vim.fn.stdpath('data') .. '/site'; require('nvim-treesitter').setup({ install_dir = install_dir }); local ok, err = pcall(function() require('nvim-treesitter').install({ 'lua', 'typescript' }):wait(300000) end); if not ok then vim.api.nvim_err_writeln(err); vim.cmd('cq') end" \
+          -c "lua local install_dir = vim.fn.stdpath('data') .. '/site'; if not vim.uv.fs_stat(install_dir .. '/parser/lua.so') then vim.api.nvim_err_writeln('lua parser missing after install'); vim.cmd('cq') end" \
+          -c "lua local install_dir = vim.fn.stdpath('data') .. '/site'; if not vim.uv.fs_stat(install_dir .. '/parser/typescript.so') then vim.api.nvim_err_writeln('typescript parser missing after install'); vim.cmd('cq') end" \
           -c "qa"
 
     - name: Run pr_ready

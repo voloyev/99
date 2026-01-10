@@ -21,6 +21,8 @@ runtime! plugin/plenary.vim
 runtime! plugin/nvim-treesitter.lua
 
 lua <<EOF
+vim.opt.rtp:append(vim.fn.stdpath('data') .. '/site')
+
 -- so far, only lua and typescript parser are used in the test
 local required_parsers = { "lua", "typescript" }
 
