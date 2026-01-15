@@ -1,13 +1,13 @@
 (
   (call
     method: (identifier) @call.name
-    arguments: (arguments) @call.args
+    arguments: (argument_list) @call.args
   ) @call.node
 )
 
 (
   (call
     method: (constant) @call.name
-    arguments: (arguments) @call.args
+    arguments: (argument_list) @call.args
   ) @call.node
 )
